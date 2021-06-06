@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "name": "shiftrgb",
+        "address": "/composition/video/effects/shiftrgb/bypassed",
+        "datatype": "integer",
+        "default_value": 1
+    },
+    {
+        "name": "kaleido",
+        "address": "/composition/video/effects/invertrgb/bypassed",
+        "datatype": "integer",
+        "default_value": 1
+    },
+    {
+        "name": "",
+        "address": "/composition/video/effects/kaleidoscope/bypassed",
+        "datatype": "integer",
+        "default_value": 1
+    },
+    {
+        "name": "",
+        "address": "/composition/video/effects/delayrgb/bypassed",
+        "datatype": "integer",
+        "default_value": 1
+    }
+]

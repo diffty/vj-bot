@@ -3,6 +3,8 @@ import os
 import random
 import functools
 import asyncio
+import requests
+
 from typing import DefaultDict
 
 from twitchio.ext import commands
@@ -10,10 +12,7 @@ from twitchio.ext.commands.core import Command
 
 from pythonosc.udp_client import SimpleUDPClient
 
-
-OSC_IP = "192.168.1.18"
-#OSC_IP = "127.0.0.1"
-OSC_PASSWORD = 7000
+import config
 
 
 def assert_user_is_mod(ctx):
@@ -35,18 +34,24 @@ def convert_value(value, datatype):
 
 class OscCommandData:
     def __init__(self):
+        self.ip = ""
+        self.port = ""
         self.name = ""
         self.address = ""
         self.datatype = ""
         self.on_value = ""
         self.off_value = ""
+        self.off_address = ""
         self.duration = ""
 
     def as_dict(self):
         return {
+            "ip": self.ip,
+            "port": self.port,
             "name": self.name,
             "address": self.address,
             "datatype": self.datatype,
+            "off_address": self.off_address,
             "off_value": self.off_value,
             "on_value": self.on_value,
             "duration": self.duration,
@@ -55,9 +60,12 @@ class OscCommandData:
     @staticmethod
     def create_from_json_entry(data):
         new_command_data = OscCommandData()
+        new_command_data.ip = data.get("ip", None)
+        new_command_data.port = data.get("port", None)
         new_command_data.name = data["name"]
         new_command_data.address = data["address"]
         new_command_data.duration = data.get("duration", -1)
+        new_command_data.off_address = data.get("off_address", None)
         new_command_data.off_value = data.get("off_value", 0)
         new_command_data.on_value = data.get("on_value", 1)
         new_command_data.datatype = data.get("datatype", "string")
@@ -95,14 +103,29 @@ class OscCommand(Command):
         if self.osc_command_data.duration > 0:
             await self.disable_after_time(self.osc_command_data.duration)
 
-    def send_message(self, value):
-        client = SimpleUDPClient(OSC_IP, OSC_PASSWORD)
-        client.send_message(self.osc_command_data.address, value)
+    def send_message(self, value, address=None, ip=None, port=None):
+        if address is None:
+            address = self.osc_command_data.address
+
+        if ip is None:
+            ip = self.osc_command_data.ip
+
+        if ip is None:
+            ip = config.OSC_IP
+        
+        if port is None:
+            port = self.osc_command_data.port
+        
+        if port is None:
+            port = config.OSC_PORT
+
+        client = SimpleUDPClient(ip, port)
+        client.send_message(address, value)
         self.curr_value = value
                         
     async def disable_after_time(self, duration):
         await asyncio.sleep(duration)
-        self.send_message(self.osc_command_data.off_value)
+        self.send_message(self.osc_command_data.off_value, self.osc_command_data.off_address)
 
 
 class Bot(commands.Bot):
@@ -118,6 +141,7 @@ class Bot(commands.Bot):
         
     async def event_ready(self):
         print(f'Logged in as | {self.nick}')
+        await self.pubsub_subscribe(config.PUBSUB_TOKEN, "channel-points-channel-v1.27497503")
 
     @commands.command()
     async def register(self, ctx):
@@ -125,16 +149,10 @@ class Bot(commands.Bot):
 
         args = ctx.message.content.split(" ")
         
-        for a in args[1:]:
-            unassigned_commands = self.get_unassigned_commands()
-
-            if len(unassigned_commands) == 0:
-                raise Exception("<!> No more unassigned commands!")
-
-            rand_idx = random.randrange(0, len(unassigned_commands))
-            self.register_command(unassigned_commands[rand_idx], a)
+        for arg in args[1:]:
+            self.assign_random_command(arg)
             
-            await ctx.send(f'New command assigned : !{a}')
+            await ctx.send(f'New command assigned : !{arg}')
 
         self.write_to_disk()
 
@@ -144,15 +162,15 @@ class Bot(commands.Bot):
 
         args = ctx.message.content.split(" ")
         
-        for a in args[1:]:
-            command = self.commands.get(a, None)
+        for arg in args[1:]:
+            command = self.commands.get(arg, None)
 
             if command is None:
-                raise Exception(f"<!> Can't find command : {a}.")
+                raise Exception(f"<!> Can't find command : {arg}.")
 
             self.unregister_command(command)
 
-            await ctx.send(f'Command unregistered : !{a}')
+            await ctx.send(f'Command unregistered : !{arg}')
 
         self.write_to_disk()
 
@@ -166,7 +184,35 @@ class Bot(commands.Bot):
         self.unassigned_commands = []
         
         self.load_from_disk()
-        
+    
+    @commands.command()
+    async def koi(self, ctx):
+        await ctx.send(f'Commandes disponibles : {" ".join(map(lambda cmd: "!" + cmd.name, filter(lambda c: isinstance(c, OscCommand), self.commands.values())))} ❤')
+
+    @commands.command()
+    async def aled(self, ctx):
+        await ctx.send(f"Coucou {ctx.author.name} {self.get_random_heart()} Y a plein de commandes dispo ce soir pour péter le stream, utilisables à volonté. T'aurais la liste complète en utilisant la commande !koi ✨")
+        await ctx.send('Aussi, tu peux obtenir ta propre commande, portant ton pseudo, en récupérant la récompense de point de chaîne "👀", ou en subbant à la chaîne !')
+
+    @commands.command()
+    async def help(self, ctx):
+        await ctx.send(f"Yoooo {ctx.author.name} {self.get_random_heart()} There's a lot of commands you can use tonight to WRECK the stream as much as you like! You can consult the complete list using the commands !koi ✨")
+        await ctx.send('Also, you can have your own command, with your name, by using the reward "👀", or subscribe to the channel!')
+
+    @staticmethod
+    def get_random_heart():
+        emotes = ["htyLuv", "copainCOEUR", "adfaceORGASM", "mayocoLOVE", "mdeetzBatKeur", "moufroLove", "GayPride", "angledLove"]
+        return emotes[random.randint(0, len(emotes)-1)]
+
+    def assign_random_command(self, new_command_name):
+        unassigned_commands = self.get_unassigned_commands()
+
+        if len(unassigned_commands) == 0:
+            raise Exception("<!> No more unassigned commands!")
+
+        rand_idx = random.randrange(0, len(unassigned_commands))
+        self.register_command(unassigned_commands[rand_idx], new_command_name)
+
     def register_command(self, command_data: OscCommandData, name: str=None):
         if name is None and command_data.name == "":
             self.unassigned_commands.append(command_data)
@@ -228,6 +274,37 @@ class Bot(commands.Bot):
         rand_idx = random.randrange(0, len(unassigned_commands))
         self.register_command(unassigned_commands[rand_idx], metadata.user.name)
         self.write_to_disk()
+    
+    async def event_raw_pubsub(self, data):
+        if 'data' in data:
+            msg = data["data"]["message"]
+            msg_dict = json.loads(msg)
+
+            print(msg_dict)
+
+            if 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👀':
+                print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user']['login']}")
+            
+            elif 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👄':
+                print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user_input']}")
+
+                command_name = msg_dict['data']['redemption']['user_input'].split(" ")
+                if command_name:
+                    self.assign_random_command(command_name[0])
+                    self.write_to_disk()
+
+                #req = requests.patch(
+                #    f"https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions?broadcaster_id={msg_dict['data']['redemption']['reward']['channel_id']}&reward_id={msg_dict['data']['redemption']['reward']['id']}&id={msg_dict['data']['redemption']['id']}",
+                #    headers={
+                #        "Client-Id": "",
+                #        "Authorization": f"Bearer ",
+                #        "Content-Type": "application/json"
+                #    },
+                #    data='{ "status": "CANCELED" }')
+                #print(req.text)
+            
+            #rewards = await self.get_custom_rewards()
+            #print(rewards)
 
 
 if __name__ == "__main__":

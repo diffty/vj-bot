@@ -136,12 +136,14 @@ class Bot(commands.Bot):
                          initial_channels=['diffty'])
         
         self.unassigned_commands = []
+
+        self.prev_donations = None
         
         self.load_from_disk()
         
     async def event_ready(self):
         print(f'Logged in as | {self.nick}')
-        await self.pubsub_subscribe(config.PUBSUB_TOKEN, "channel-points-channel-v1.27497503")
+        #await self.pubsub_subscribe(config.PUBSUB_TOKEN, "channel-points-channel-v1.27497503")
 
     @commands.command()
     async def register(self, ctx):
@@ -201,10 +203,10 @@ class Bot(commands.Bot):
 
     @staticmethod
     def get_random_heart():
-        emotes = ["htyLuv", "copainCOEUR", "adfaceORGASM", "mayocoLOVE", "mdeetzBatKeur", "moufroLove", "GayPride", "angledLove"]
+        emotes = ["htyLuv", "moufroLove", "GayPride"]
         return emotes[random.randint(0, len(emotes)-1)]
 
-    def assign_random_command(self, new_command_name):
+    def assign_random_command(self, new_command_name: str):
         unassigned_commands = self.get_unassigned_commands()
 
         if len(unassigned_commands) == 0:
@@ -269,42 +271,42 @@ class Bot(commands.Bot):
             )
         )
     
-    async def event_usernotice_subscription(self, metadata):
-        unassigned_commands = self.get_unassigned_commands()
-        rand_idx = random.randrange(0, len(unassigned_commands))
-        self.register_command(unassigned_commands[rand_idx], metadata.user.name)
-        self.write_to_disk()
+    #async def event_usernotice_subscription(self, metadata):
+    #    unassigned_commands = self.get_unassigned_commands()
+    #    rand_idx = random.randrange(0, len(unassigned_commands))
+    #    self.register_command(unassigned_commands[rand_idx], metadata.user.name)
+    #    self.write_to_disk()
     
-    async def event_raw_pubsub(self, data):
-        if 'data' in data:
-            msg = data["data"]["message"]
-            msg_dict = json.loads(msg)
+    #async def event_raw_pubsub(self, data):
+    #    if 'data' in data:
+    #        msg = data["data"]["message"]
+    #        msg_dict = json.loads(msg)
 
-            print(msg_dict)
+    #        print(msg_dict)
 
-            if 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👀':
-                print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user']['login']}")
-            
-            elif 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👄':
-                print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user_input']}")
+    #        if 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👀':
+    #            print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user']['login']}")
+    #        
+    #        elif 'data' in msg_dict and msg_dict['data']['redemption']['reward']['title'] == '👄':
+    #            print(f"ON GENERE UNE COMMANDE POUR {msg_dict['data']['redemption']['user_input']}")
 
-                command_name = msg_dict['data']['redemption']['user_input'].split(" ")
-                if command_name:
-                    self.assign_random_command(command_name[0])
-                    self.write_to_disk()
+    #            command_name = msg_dict['data']['redemption']['user_input'].split(" ")
+    #            if command_name:
+    #                self.assign_random_command(command_name[0])
+    #                self.write_to_disk()
 
-                #req = requests.patch(
-                #    f"https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions?broadcaster_id={msg_dict['data']['redemption']['reward']['channel_id']}&reward_id={msg_dict['data']['redemption']['reward']['id']}&id={msg_dict['data']['redemption']['id']}",
-                #    headers={
-                #        "Client-Id": "",
-                #        "Authorization": f"Bearer ",
-                #        "Content-Type": "application/json"
-                #    },
-                #    data='{ "status": "CANCELED" }')
-                #print(req.text)
-            
-            #rewards = await self.get_custom_rewards()
-            #print(rewards)
+    #            #req = requests.patch(
+    #            #    f"https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions?broadcaster_id={msg_dict['data']['redemption']['reward']['channel_id']}&reward_id={msg_dict['data']['redemption']['reward']['id']}&id={msg_dict['data']['redemption']['id']}",
+    #            #    headers={
+    #            #        "Client-Id": "",
+    #            #        "Authorization": f"Bearer ",
+    #            #        "Content-Type": "application/json"
+    #            #    },
+    #            #    data='{ "status": "CANCELED" }')
+    #            #print(req.text)
+    #        
+    #        #rewards = await self.get_custom_rewards()
+    #        #print(rewards)
 
 
 if __name__ == "__main__":

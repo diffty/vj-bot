@@ -5,7 +5,7 @@ import functools
 import asyncio
 import requests
 
-from typing import DefaultDict
+from typing import DefaultDict, List
 
 from twitchio.ext import commands
 from twitchio.ext.commands.core import Command
@@ -43,6 +43,7 @@ class OscCommandData:
         self.off_value = ""
         self.off_address = ""
         self.duration = ""
+        self.visible = ""
 
     def as_dict(self):
         return {
@@ -55,6 +56,7 @@ class OscCommandData:
             "off_value": self.off_value,
             "on_value": self.on_value,
             "duration": self.duration,
+            "visible": self.visible,
         }
     
     @staticmethod
@@ -68,6 +70,7 @@ class OscCommandData:
         new_command_data.off_address = data.get("off_address", None)
         new_command_data.off_value = data.get("off_value", 0)
         new_command_data.on_value = data.get("on_value", 1)
+        new_command_data.visible = data.get("visible", True)
         new_command_data.datatype = data.get("datatype", "string")
         return new_command_data
 
@@ -130,7 +133,7 @@ class OscCommand(Command):
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(irc_token='oauth:twszee7twbiyiphmus1l43dt7gwgez',
+        super().__init__(token='',
                          prefix='!',
                          nick="DiFFtY",
                          initial_channels=['diffty'])
@@ -146,7 +149,7 @@ class Bot(commands.Bot):
         #await self.pubsub_subscribe(config.PUBSUB_TOKEN, "channel-points-channel-v1.27497503")
 
     @commands.command()
-    async def register(self, ctx):
+    async def register(self, ctx: commands.Context):
         assert_user_is_mod(ctx)
 
         args = ctx.message.content.split(" ")
@@ -159,7 +162,7 @@ class Bot(commands.Bot):
         self.write_to_disk()
 
     @commands.command()
-    async def unregister(self, ctx):
+    async def unregister(self, ctx: commands.Context):
         assert_user_is_mod(ctx)
 
         args = ctx.message.content.split(" ")
@@ -175,31 +178,59 @@ class Bot(commands.Bot):
             await ctx.send(f'Command unregistered : !{arg}')
 
         self.write_to_disk()
+    
+    @commands.command()
+    async def reveal(self, ctx: commands.Context):
+        assert_user_is_mod(ctx)
+
+        args = ctx.message.content.split(" ")
+        
+        if len(args) >= 2:
+            command_list = map(lambda cmd_name: self.commands[cmd_name], args[1:])
+        else:
+            hidden_commands = self.get_commands_with_visibility(False)
+            if hidden_commands:
+                command_list = [random.choice(hidden_commands)]
+
+        self.reveal_commands(command_list)
+
+        for cmd in command_list:
+            await ctx.send(f'Commande révélée : !{cmd.name}')
+
+        self.write_to_disk()
+    
+    def reveal_commands(self, command_list: List[OscCommand]):
+        for cmd in command_list:
+            command = self.commands.get(cmd.name, None)
+
+            if command is None:
+                raise Exception(f"<!> Can't find command : {cmd.name}.")
+
+            command.osc_command_data.visible = True
 
     @commands.command()
-    async def reload(self, ctx):
+    async def reload(self, ctx: commands.Context):
         assert_user_is_mod(ctx)
         
-        for cmd in list(filter(lambda c: c.__class__ is OscCommand, self.commands.values())):
-            self.remove_command(cmd)
+        for name, cmd in list(filter(lambda c: c[1].__class__ is OscCommand, self.commands.items())):
+            self.remove_command(name)
         
         self.unassigned_commands = []
         
         self.load_from_disk()
     
     @commands.command()
-    async def koi(self, ctx):
-        await ctx.send(f'Commandes disponibles : {" ".join(map(lambda cmd: "!" + cmd.name, filter(lambda c: isinstance(c, OscCommand), self.commands.values())))} ❤')
+    async def commandes(self, ctx: commands.Context):
+        await ctx.send(f'Commandes disponibles : {" ".join(map(lambda cmd: "!" + cmd.name, filter(lambda c: isinstance(c, OscCommand) and c.osc_command_data.visible, self.commands.values())))} ❤')
 
     @commands.command()
-    async def aled(self, ctx):
-        await ctx.send(f"Coucou {ctx.author.name} {self.get_random_heart()} Y a plein de commandes dispo ce soir pour péter le stream, utilisables à volonté. T'aurais la liste complète en utilisant la commande !koi ✨")
+    async def koi(self, ctx: commands.Context):
+        await ctx.send(f"feur {ctx.author.name}")
+    
+    @commands.command(aliases=["help", "aide"])
+    async def aled(self, ctx: commands.Context):
+        await ctx.send(f"Coucou {ctx.author.name} {self.get_random_heart()} Y a plein de commandes dispo ce soir pour péter le stream, utilisables à volonté. T'aurais la liste complète en utilisant la commande !commandes ✨")
         await ctx.send('Aussi, tu peux obtenir ta propre commande, portant ton pseudo, en récupérant la récompense de point de chaîne "👀", ou en subbant à la chaîne !')
-
-    @commands.command()
-    async def help(self, ctx):
-        await ctx.send(f"Yoooo {ctx.author.name} {self.get_random_heart()} There's a lot of commands you can use tonight to WRECK the stream as much as you like! You can consult the complete list using the commands !koi ✨")
-        await ctx.send('Also, you can have your own command, with your name, by using the reward "👀", or subscribe to the channel!')
 
     @staticmethod
     def get_random_heart():
@@ -228,7 +259,7 @@ class Bot(commands.Bot):
         if command.__class__ is not OscCommand:
             raise Exception(f"<!> Command {command.name} is not an OscCommand")
 
-        self.remove_command(command)
+        self.remove_command(command.name)
 
         command.osc_command_data.name = ""
         
@@ -239,7 +270,7 @@ class Bot(commands.Bot):
         self.add_command(command)
         if command_data in self.unassigned_commands:
             self.unassigned_commands.remove(command_data)
-
+    
     def load_from_disk(self):
         if os.path.exists("commands.json"):
             fp = open("commands.json", "r")
@@ -268,6 +299,14 @@ class Bot(commands.Bot):
             map(
                 lambda cmd: cmd.osc_command_data,
                 filter(lambda c: c.__class__ is OscCommand, self.commands.values())
+            )
+        )
+    
+    def get_commands_with_visibility(self, visibility: bool = True) -> List[OscCommand]:
+        return list(
+            map(
+                lambda cmd: cmd.osc_command_data,
+                filter(lambda c: c.__class__ is OscCommand and c.osc_command_data.visible == visibility, self.commands.values())
             )
         )
     

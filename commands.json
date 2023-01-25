@@ -8,7 +8,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -19,7 +20,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -30,7 +32,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -41,7 +44,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -52,7 +56,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -63,7 +68,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": null,
@@ -74,40 +80,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 10
-    },
-    {
-        "ip": "192.168.1.47",
-        "port": 8000,
-        "name": "strobe",
-        "address": "/program_select/1/4",
-        "datatype": "integer",
-        "off_address": "/program_select/1/1",
-        "off_value": 1,
-        "on_value": 1,
-        "duration": 1
-    },
-    {
-        "ip": null,
-        "port": null,
-        "name": "decka",
-        "address": "/composition/layers/2/clips/4/connect",
-        "datatype": "integer",
-        "off_address": "/composition/layers/2/clear",
-        "off_value": 1,
-        "on_value": 1,
-        "duration": 15
-    },
-    {
-        "ip": null,
-        "port": null,
-        "name": "deckb",
-        "address": "/composition/layers/2/clips/5/connect",
-        "datatype": "integer",
-        "off_address": "/composition/layers/2/clear",
-        "off_value": 1,
-        "on_value": 1,
-        "duration": 15
+        "duration": 10,
+        "visible": true
     },
     {
         "ip": null,
@@ -118,7 +92,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 10
+        "duration": 10,
+        "visible": true
     },
     {
         "ip": null,
@@ -129,7 +104,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 20
+        "duration": 20,
+        "visible": true
     },
     {
         "ip": null,
@@ -140,7 +116,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 5
+        "duration": 5,
+        "visible": true
     },
     {
         "ip": null,
@@ -151,7 +128,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": null,
@@ -162,7 +140,8 @@
         "off_address": "/composition/layers/2/clear",
         "off_value": 1,
         "on_value": 1,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": null,
@@ -173,7 +152,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 50
+        "duration": 50,
+        "visible": true
     },
     {
         "ip": null,
@@ -184,7 +164,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 60
+        "duration": 60,
+        "visible": true
     },
     {
         "ip": null,
@@ -195,7 +176,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 50
+        "duration": 50,
+        "visible": true
     },
     {
         "ip": null,
@@ -206,7 +188,8 @@
         "off_address": "/composition/layers/2/clear",
         "off_value": 1,
         "on_value": 1,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": null,
@@ -217,7 +200,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 10
+        "duration": 10,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -228,7 +212,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": null,
@@ -239,7 +224,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -250,7 +236,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": null,
@@ -261,7 +248,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -272,7 +260,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -283,7 +272,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": null,
@@ -294,7 +284,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 10
+        "duration": 10,
+        "visible": true
     },
     {
         "ip": null,
@@ -305,7 +296,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": null,
@@ -316,7 +308,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 30
+        "duration": 30,
+        "visible": true
     },
     {
         "ip": null,
@@ -327,7 +320,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 60
+        "duration": 60,
+        "visible": true
     },
     {
         "ip": null,
@@ -338,7 +332,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 3
+        "duration": 3,
+        "visible": true
     },
     {
         "ip": null,
@@ -349,18 +344,8 @@
         "off_address": "/composition/layers/2/clear",
         "off_value": 1,
         "on_value": 1,
-        "duration": 15
-    },
-    {
-        "ip": null,
-        "port": null,
-        "name": "",
-        "address": "/composition/video/effects/lorezeffect/bypassed",
-        "datatype": "integer",
-        "off_address": null,
-        "off_value": 1,
-        "on_value": 0,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -371,7 +356,8 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -382,7 +368,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": 15
+        "duration": 15,
+        "visible": true
     },
     {
         "ip": null,
@@ -393,7 +380,8 @@
         "off_address": null,
         "off_value": 1,
         "on_value": 0,
-        "duration": -1
+        "duration": -1,
+        "visible": true
     },
     {
         "ip": "192.168.1.47",
@@ -404,6 +392,55 @@
         "off_address": null,
         "off_value": 0,
         "on_value": 1,
-        "duration": -1
+        "duration": -1,
+        "visible": true
+    },
+    {
+        "ip": null,
+        "port": null,
+        "name": "",
+        "address": "/composition/video/effects/lorezeffect/bypassed",
+        "datatype": "integer",
+        "off_address": null,
+        "off_value": 1,
+        "on_value": 0,
+        "duration": 15,
+        "visible": true
+    },
+    {
+        "ip": "192.168.1.47",
+        "port": 8000,
+        "name": "strobe",
+        "address": "/program_select/1/4",
+        "datatype": "integer",
+        "off_address": "/program_select/1/1",
+        "off_value": 1,
+        "on_value": 1,
+        "duration": 1,
+        "visible": true
+    },
+    {
+        "ip": null,
+        "port": null,
+        "name": "decka",
+        "address": "/composition/layers/2/clips/4/connect",
+        "datatype": "integer",
+        "off_address": "/composition/layers/2/clear",
+        "off_value": 1,
+        "on_value": 1,
+        "duration": 15,
+        "visible": true
+    },
+    {
+        "ip": null,
+        "port": null,
+        "name": "deckb",
+        "address": "/composition/layers/2/clips/5/connect",
+        "datatype": "integer",
+        "off_address": "/composition/layers/2/clear",
+        "off_value": 1,
+        "on_value": 1,
+        "duration": 15,
+        "visible": true
     }
 ]

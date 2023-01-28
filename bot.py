@@ -14,6 +14,8 @@ from pythonosc.udp_client import SimpleUDPClient
 
 import config
 
+from donation_tracker import DonationsTracker
+
 
 def assert_user_is_mod(ctx):
     if not ctx.author.is_mod:
@@ -133,20 +135,23 @@ class OscCommand(Command):
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(token='',
+        super().__init__(token=config.TWITCH_CHAT_TOKEN,
                          prefix='!',
                          nick="DiFFtY",
-                         initial_channels=['diffty'])
+                         initial_channels=['piquetdestream'])
         
         self.unassigned_commands = []
 
         self.prev_donations = None
-        
+        self.donation_tracker = DonationsTracker(donation_event_callback=lambda: asyncio.get_event_loop().create_task(self.on_donation_event()))
+
         self.load_from_disk()
         
     async def event_ready(self):
         print(f'Logged in as | {self.nick}')
         #await self.pubsub_subscribe(config.PUBSUB_TOKEN, "channel-points-channel-v1.27497503")
+        task = asyncio.get_event_loop().create_task(self.donation_tracker.run())
+        print("Donation tracker should be launched: " + str(task))
 
     @commands.command()
     async def register(self, ctx: commands.Context):
@@ -187,18 +192,38 @@ class Bot(commands.Bot):
         
         if len(args) >= 2:
             command_list = map(lambda cmd_name: self.commands[cmd_name], args[1:])
+            self.reveal_commands(command_list)
         else:
-            hidden_commands = self.get_commands_with_visibility(False)
-            if hidden_commands:
-                command_list = [random.choice(hidden_commands)]
-
-        self.reveal_commands(command_list)
+            command_list = self.reveal_random_command()
 
         for cmd in command_list:
-            await ctx.send(f'Commande révélée : !{cmd.name}')
+            await ctx.send(f'Nouvelle commande révélée : !{cmd.name}')
 
         self.write_to_disk()
     
+    async def on_donation_event(self):
+        command_list = self.reveal_random_command()
+
+        for cmd in command_list:
+            for channel in self.connected_channels:
+                print(f"Sending message to {channel}")
+                await channel.send(f'MERCI POUR LE DON {self.get_random_heart()}')
+                await channel.send(f'Nouvelle commande révélée : !{cmd.name}')
+        
+        self.write_to_disk()
+
+    def reveal_random_command(self):
+        print("reveal_random_command")
+        hidden_commands = self.get_commands_with_visibility(False)
+        print(hidden_commands)
+        if hidden_commands:
+            command_list = [random.choice(hidden_commands)]
+            print(command_list)
+            self.reveal_commands(command_list)
+            return command_list
+        else:
+            return []
+
     def reveal_commands(self, command_list: List[OscCommand]):
         for cmd in command_list:
             command = self.commands.get(cmd.name, None)
@@ -219,7 +244,7 @@ class Bot(commands.Bot):
         
         self.load_from_disk()
     
-    @commands.command()
+    @commands.command(aliases=["commands"])
     async def commandes(self, ctx: commands.Context):
         await ctx.send(f'Commandes disponibles : {" ".join(map(lambda cmd: "!" + cmd.name, filter(lambda c: isinstance(c, OscCommand) and c.osc_command_data.visible, self.commands.values())))} ❤')
 
@@ -230,11 +255,15 @@ class Bot(commands.Bot):
     @commands.command(aliases=["help", "aide"])
     async def aled(self, ctx: commands.Context):
         await ctx.send(f"Coucou {ctx.author.name} {self.get_random_heart()} Y a plein de commandes dispo ce soir pour péter le stream, utilisables à volonté. T'aurais la liste complète en utilisant la commande !commandes ✨")
-        await ctx.send('Aussi, tu peux obtenir ta propre commande, portant ton pseudo, en récupérant la récompense de point de chaîne "👀", ou en subbant à la chaîne !')
+        await ctx.send("Tu peux aussi révéler une nouvelle commande en faisant un don de n'importe quel montant à la caisse de grève https://www.helloasso.com/associations/caisse-de-solidarite-2/formulaires/2 !")
+
+    @commands.command()
+    async def asscrack(self, ctx: commands.Context):
+        await ctx.send(f"ok mrchonks")
 
     @staticmethod
     def get_random_heart():
-        emotes = ["htyLuv", "moufroLove", "GayPride"]
+        emotes = ["htyLuv", "moufroLove", "GayPride", "jogauLOVE", "jussetLOVE", "opcrotteLOVE", "adfaceCOEUR", "❤️", "🧡", "💛", "💚", "💙", "💜", "❣️", "💕", "💓", "💗", "💖", "❤️‍🔥"]
         return emotes[random.randint(0, len(emotes)-1)]
 
     def assign_random_command(self, new_command_name: str):

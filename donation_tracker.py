@@ -18,8 +18,11 @@ class DonationsTracker:
             new_amount = self.retrieve_amount()
             if new_amount:
                 if new_amount != self.curr_amount:
+                    print(f"[DonationsTracker] New donation detected! ({self.curr_amount} -> {new_amount})")
+                    #await self.donation_event_callback()
                     if self.curr_amount != None and self.donation_event_callback:
-                        self.donation_event_callback()
+                        print(f"[DonationsTracker] Calling callback {self.donation_event_callback}")
+                        await self.donation_event_callback()
 
                     self.curr_amount = new_amount
                     self.write_to_disk()
@@ -48,9 +51,9 @@ class DonationsTracker:
         fp.close()
 
 
-def _test():
-    print("owey")
+if __name__ == "__main__":
+    def _test():
+        print("owey")
 
-
-d = DonationsTracker(donation_event_callback=_test)
-asyncio.get_event_loop().run_until_complete(d.run())
+    d = DonationsTracker(donation_event_callback=_test)
+    asyncio.get_event_loop().run_until_complete(d.run())
